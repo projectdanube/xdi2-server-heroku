@@ -5,7 +5,7 @@
 	<groupId>xdi2</groupId>
 	<artifactId>xdi2-server-heroku</artifactId>
 	<packaging>jar</packaging>
-	<version>0.8-M3</version>
+	<version>0.8-SNAPSHOT</version>
 	<name>xdi2-server-heroku</name>
 
 	<issueManagement>
@@ -250,7 +250,7 @@
 		<dependency>
 			<groupId>xdi2</groupId>
 			<artifactId>xdi2-server-standalone</artifactId>
-			<version>0.8-M3</version>
+			<version>0.8-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
