@@ -5,12 +5,12 @@
 
 	<!-- XDI ENDPOINT REGISTRY AND TRANSPORT -->
 
-	<bean id="UriMessagingTargetRegistry" class="xdi2.transport.registry.impl.uri.UriMessagingTargetRegistry" init-method="init" destroy-method="shutdown" />
+	<bean id="UriMessagingContainerRegistry" class="xdi2.transport.registry.impl.uri.UriMessagingContainerRegistry" init-method="init" destroy-method="shutdown" />
 
 	<bean id="DebugHttpTransportInterceptor" class="xdi2.transport.impl.http.interceptor.impl.DebugHttpTransportInterceptor" />
 
 	<bean id="HttpTransport" class="xdi2.transport.impl.http.HttpTransport" init-method="init" destroy-method="shutdown">
-		<property name="uriMessagingTargetRegistry" ref="UriMessagingTargetRegistry" />
+		<property name="uriMessagingContainerRegistry" ref="UriMessagingContainerRegistry" />
 		<property name="interceptors">
 			<util:list>
 				<ref bean="DebugHttpTransportInterceptor" />
@@ -19,7 +19,7 @@
 	</bean>
 
 	<bean id="WebSocketTransport" class="xdi2.transport.impl.websocket.WebSocketTransport" init-method="init" destroy-method="shutdown">
-		<property name="uriMessagingTargetRegistry" ref="UriMessagingTargetRegistry" />
+		<property name="uriMessagingContainerRegistry" ref="UriMessagingContainerRegistry" />
 		<property name="endpointPath" value="/xdi/" />
 		<property name="interceptors">
 			<util:list>
@@ -48,8 +48,8 @@
 		<property name="agentRouters">
 			<util:list>
 				<bean class="xdi2.agent.routing.impl.bootstrap.XDIBootstrapLocalAgentRouter" />
-				<bean class="xdi2.agent.routing.impl.local.XDIMessagingTargetRegistryAgentRouter">
-					<property name="messagingTargetRegistry" ref="UriMessagingTargetRegistry" />
+				<bean class="xdi2.agent.routing.impl.local.XDIMessagingContainerRegistryAgentRouter">
+					<property name="messagingTargetRegistry" ref="UriMessagingContainerRegistry" />
 					<property name="interceptors">
 						<util:list>
 							<ref bean="DebugHttpTransportInterceptor" />
@@ -66,14 +66,14 @@
 		</property>
 	</bean>
 
-	<!-- MESSAGING TARGET TO BE USED AS A PROTOTYPE FOR MESSAGING TARGET FACTORIES -->
+	<!-- MESSAGING CONTAINER TO BE USED AS A PROTOTYPE FOR MESSAGING CONTAINER FACTORIES -->
 
 	<bean id="prototypeGraphFactory" class="xdi2.core.impl.memory.MemoryGraphFactory">
 	</bean>
 
 	<bean id="prototypeGraph" factory-bean="prototypeGraphFactory" factory-method="openGraph" />
 
-	<bean id="prototypeMessagingTarget" class="xdi2.messaging.target.impl.graph.GraphMessagingTarget">
+	<bean id="prototypeMessagingContainer" class="xdi2.messaging.target.impl.graph.GraphMessagingContainer">
 		<property name="graph" ref="prototypeGraph" />
 		<property name="interceptors">
 			<util:list>
@@ -187,13 +187,13 @@
 		</property>
 	</bean>
 
-	<!-- MESSAGING TARGET FACTORY at /any/* -->
+	<!-- MESSAGING CONTAINER FACTORY at /any/* -->
 
-	<bean name="/any/*" class="xdi2.messaging.target.factory.impl.uri.AnyUriMessagingTargetFactory">
-		<property name="prototypeMessagingTarget" ref="prototypeMessagingTarget" />
+	<bean name="/any/*" class="xdi2.messaging.target.factory.impl.uri.AnyUriMessagingContainerFactory">
+		<property name="prototypeMessagingContainer" ref="prototypeMessagingContainer" />
 	</bean>
 
-	<!-- MESSAGING TARGET FACTORY at /users/* -->
+	<!-- MESSAGING CONTAINER FACTORY at /users/* -->
 
 	<bean id="registryGraphfactory" class="xdi2.core.impl.wrapped.file.FileWrapperGraphFactory">
 		<property name="path" value="registry.xdi" />
@@ -202,16 +202,16 @@
 
 	<bean id="registryGraph" factory-bean="registryGraphfactory" factory-method="openGraph" />
 
-	<bean name="/users/*" class="xdi2.messaging.target.factory.impl.uri.RegistryUriMessagingTargetFactory">
-		<property name="prototypeMessagingTarget" ref="prototypeMessagingTarget" />
+	<bean name="/users/*" class="xdi2.messaging.target.factory.impl.uri.RegistryUriMessagingContainerFactory">
+		<property name="prototypeMessagingContainer" ref="prototypeMessagingContainer" />
 		<property name="registryGraph" ref="registryGraph" />
 		<property name="defaultDisabled" value="false" />
 		<property name="disabledError" value="This graph is temporarily disabled" />
 	</bean>
 
-	<!-- REGISTRY MESSAGING TARGET -->
+	<!-- REGISTRY MESSAGING CONTAINER -->
 
-	<bean name="/registry" class="xdi2.messaging.target.impl.graph.GraphMessagingTarget">
+	<bean name="/registry" class="xdi2.messaging.target.impl.graph.GraphMessagingContainer">
 		<property name="graph" ref="registryGraph" />
 		<property name="interceptors">
 			<util:list>
@@ -335,15 +335,15 @@
 		</property>
 	</bean>
 
-	<!-- MESSAGING TARGET at /mem-graph -->
-	<!-- MessagingTarget: GraphMessagingTarget backed by a MemoryGraph -->
+	<!-- MESSAGING CONTAINER at /mem-graph -->
+	<!-- MessagingContainer: GraphMessagingContainer backed by a MemoryGraph -->
 
 	<bean id="graphfactory1" class="xdi2.core.impl.memory.MemoryGraphFactory">
 	</bean>
 
 	<bean id="graphMem" factory-bean="graphfactory1" factory-method="openGraph" />
 
-	<bean name="/mem-graph" class="xdi2.messaging.target.impl.graph.GraphMessagingTarget">
+	<bean name="/mem-graph" class="xdi2.messaging.target.impl.graph.GraphMessagingContainer">
 		<property name="graph" ref="graphMem" />
 		<property name="interceptors">
 			<util:list>
@@ -353,8 +353,8 @@
 		</property>
 	</bean>
 
-	<!-- MESSAGING TARGET at /=alice -->
-	<!-- MessagingTarget: GraphMessagingTarget backed by a MemoryGraph -->
+	<!-- MESSAGING CONTAINER at /=alice -->
+	<!-- MessagingContainer: GraphMessagingContainer backed by a MemoryGraph -->
 
 	<bean id="graphfactory4" class="xdi2.core.impl.memory.MemoryGraphFactory">
 	</bean>
@@ -363,7 +363,7 @@
 		<constructor-arg><value>(=!:uuid:1111)</value></constructor-arg>
 	</bean>
 
-	<bean name="/=alice" class="xdi2.messaging.target.impl.graph.GraphMessagingTarget">
+	<bean name="/=alice" class="xdi2.messaging.target.impl.graph.GraphMessagingContainer">
 		<property name="graph" ref="graphAlice" />
 		<property name="interceptors">
 			<util:list>
